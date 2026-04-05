@@ -41,7 +41,7 @@ app.get('/api/health', (req, res) => {
 });
 
 // Serve Frontend
-const frontendPath = path.join(__dirname, '../Frontend');
+const frontendPath = path.join(__dirname, '../frontend');
 app.use(express.static(frontendPath));
 
 app.get('/', (req, res) => {
