@@ -3,25 +3,55 @@ let currentSection = 'home';
 
 window.addEventListener('DOMContentLoaded', async () => {
   const token = localStorage.getItem(CONFIG.TOKEN_KEY);
-  if (!token) { window.location.href = '/'; return; }
+  if (!token) {
+    window.location.href = '/';
+    return;
+  }
 
+  // Try to load user - but don't logout on failure
   await loadUserData();
   updateClock();
   setInterval(updateClock, 60000);
   showSection('home');
-  initReminderChecker();
+  // Start alarm checker from reminders.js
+  if (typeof startReminderAlarmChecker === "function") startReminderAlarmChecker();
 });
 
 async function loadUserData() {
   try {
     const result = await apiCall('/auth/me');
-    if (!result.ok) { logout(); return; }
+
+    if (!result || !result.ok) {
+      // Token invalid - check if it's truly a 401
+      if (result && result.status === 401) {
+        showToast('Session expired. Please login again.', 'error');
+        setTimeout(() => {
+          localStorage.removeItem(CONFIG.TOKEN_KEY);
+          localStorage.removeItem(CONFIG.USER_KEY);
+          window.location.href = '/';
+        }, 2000);
+        return;
+      }
+      // Network error - try using cached user
+      const cachedUser = getUser();
+      if (cachedUser) {
+        renderUserInfo(cachedUser);
+        return;
+      }
+      return;
+    }
+
     const user = result.data.user;
     setUser(user);
     renderUserInfo(user);
     await loadDashboardStats();
   } catch (err) {
     console.error('Load user error:', err);
+    // Try cached user on error
+    const cachedUser = getUser();
+    if (cachedUser) {
+      renderUserInfo(cachedUser);
+    }
   }
 }
 
@@ -32,7 +62,6 @@ function renderUserInfo(user) {
   el('sidebarName', user.name);
   el('sidebarAge', `Age: ${user.age || '--'} | ${user.gender || '--'}`);
 
-  // Update time-based greeting
   const h = new Date().getHours();
   const greeting = h < 12 ? 'Good Morning' : h < 17 ? 'Good Afternoon' : 'Good Evening';
   el('welcomeGreeting', `${greeting}, ${user.name.split(' ')[0]}! 🙏`);
@@ -49,32 +78,28 @@ async function loadDashboardStats() {
     const user = getUser();
     const contacts = user?.emergencyContacts?.length || 0;
 
-    let totalMeds = 0, takenCount = 0, upcomingCount = 0;
-
-    if (medsResult.ok) {
-      totalMeds = medsResult.data.medicines?.length || 0;
+    if (medsResult && medsResult.ok) {
+      const totalMeds = medsResult.data.medicines?.length || 0;
       document.getElementById('statMeds').textContent = totalMeds;
       document.getElementById('wsTotalMeds').textContent = totalMeds;
       const badge = document.getElementById('medBadge');
-      if (totalMeds > 0) { badge.textContent = totalMeds; badge.classList.remove('hidden'); }
+      if (totalMeds > 0 && badge) { badge.textContent = totalMeds; badge.classList.remove('hidden'); }
     }
 
-    if (remResult.ok) {
+    if (remResult && remResult.ok) {
       const reminders = remResult.data.reminders || [];
       const now = new Date().toTimeString().slice(0, 5);
-      takenCount = reminders.filter(r => r.taken).length;
-      upcomingCount = reminders.filter(r => !r.taken && r.time >= now).length;
+      const takenCount = reminders.filter(r => r.taken).length;
+      const upcomingCount = reminders.filter(r => !r.taken && r.time >= now).length;
 
       document.getElementById('statTaken').textContent = takenCount;
       document.getElementById('statUpcoming').textContent = upcomingCount;
       document.getElementById('wsTodayTaken').textContent = takenCount;
       document.getElementById('wsUpcoming').textContent = upcomingCount;
 
-      // Show notification dot if upcoming
       if (upcomingCount > 0) {
         document.querySelectorAll('.notification-dot').forEach(d => d.style.display = 'block');
       }
-
       renderHomeReminders(reminders.slice(0, 4));
     }
 
@@ -86,6 +111,7 @@ async function loadDashboardStats() {
 
 function renderHomeReminders(reminders) {
   const container = document.getElementById('homeReminders');
+  if (!container) return;
   if (!reminders || reminders.length === 0) {
     container.innerHTML = `<div class="empty-state" style="padding:20px;"><i class="fas fa-check-circle" style="font-size:2rem;color:var(--success);"></i><p>All caught up for today! ✅</p></div>`;
     return;
@@ -99,8 +125,8 @@ function renderHomeReminders(reminders) {
         <div class="reminder-dosage">${r.dosage} · ${r.label}</div>
       </div>
       <div class="reminder-status">
-        ${r.taken ? '<span class="badge badge-success"><i class="fas fa-check"></i> Taken</span>' : 
-          r.time < now ? '<span class="badge badge-danger">Missed</span>' : 
+        ${r.taken ? '<span class="badge badge-success"><i class="fas fa-check"></i> Taken</span>' :
+          r.time < now ? '<span class="badge badge-danger">Missed</span>' :
           '<span class="badge badge-warning">Pending</span>'}
       </div>
     </div>`).join('');
@@ -119,14 +145,13 @@ function showSection(name) {
   const titles = {
     home: 'Dashboard', medicines: 'My Medicines', reminders: "Today's Reminders",
     disease: 'Disease Check', sos: 'SOS Emergency', music: 'Music Player',
-    chatbot: 'AI Chatbot', profile: 'My Profile', voice: 'Voice Assistant'
+    chatbot: 'AI Chatbot', profile: 'My Profile'
   };
   const el = document.getElementById('topbarTitle');
   if (el) el.textContent = titles[name] || 'SmartSaathi';
 
   currentSection = name;
 
-  // Load section-specific data
   if (name === 'home') loadDashboardStats();
   else if (name === 'medicines') loadMedicines();
   else if (name === 'reminders') loadReminders();
@@ -136,11 +161,11 @@ function showSection(name) {
   else if (name === 'chatbot') initChatbot();
   else if (name === 'profile') loadProfile();
 
-  // Close sidebar on mobile
   const sidebar = document.getElementById('sidebar');
-  if (window.innerWidth <= 900) {
+  if (window.innerWidth <= 900 && sidebar) {
     sidebar.classList.remove('open');
-    document.getElementById('sidebarOverlay').classList.add('hidden');
+    const overlay = document.getElementById('sidebarOverlay');
+    if (overlay) overlay.classList.add('hidden');
   }
 }
 
@@ -155,11 +180,10 @@ function updateClock() {
 function toggleSidebar() {
   const sidebar = document.getElementById('sidebar');
   const overlay = document.getElementById('sidebarOverlay');
-  sidebar.classList.toggle('open');
-  overlay.classList.toggle('hidden');
+  if (sidebar) sidebar.classList.toggle('open');
+  if (overlay) overlay.classList.toggle('hidden');
 }
 
-// Reminder notification checker
 function initReminderChecker() {
   checkUpcomingReminders();
   setInterval(checkUpcomingReminders, 60000);
@@ -168,7 +192,7 @@ function initReminderChecker() {
 async function checkUpcomingReminders() {
   try {
     const result = await apiCall('/reminders/upcoming');
-    if (!result.ok) return;
+    if (!result || !result.ok) return;
     const reminders = result.data.reminders || [];
     const soonReminders = reminders.filter(r => !r.taken && r.minutesUntil >= 0 && r.minutesUntil <= 15);
     soonReminders.forEach(r => {

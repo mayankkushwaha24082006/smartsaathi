@@ -1,24 +1,17 @@
 // ===== AUTH LOGIC =====
 let otpTimerInterval = null;
 
-// Show loading screen then landing
 window.addEventListener('DOMContentLoaded', () => {
-  // Check if already logged in
   const token = localStorage.getItem(CONFIG.TOKEN_KEY);
   if (token) {
-    window.location.href = '/pages/dashboard.html';
+    window.location.href = '/dashboard';
     return;
   }
-
-  // Animate loading screen
   setTimeout(() => {
     const screen = document.getElementById('loadingScreen');
     if (screen) {
       screen.classList.add('fade-out');
-      setTimeout(() => {
-        screen.style.display = 'none';
-        showLanding();
-      }, 500);
+      setTimeout(() => { screen.style.display = 'none'; showLanding(); }, 500);
     }
   }, 2200);
 });
@@ -46,7 +39,6 @@ function toggleAuth(mode) {
   }
 }
 
-// ===== SEND OTP =====
 async function sendOTP(type) {
   const phoneInput = document.getElementById(type === 'login' ? 'loginPhone' : 'regPhone');
   const phone = phoneInput.value.trim();
@@ -64,7 +56,7 @@ async function sendOTP(type) {
     if (!age || age < 1 || age > 120) { showToast('Please enter a valid age', 'error'); return; }
   }
 
-  const btn = document.querySelector('#' + (type === 'login' ? 'sendLoginOtp' : 'regStep1') + ' .btn-otp') || document.querySelector('.btn-otp');
+  const btn = document.querySelector('.btn-otp');
   if (btn) setButtonLoading(btn, true, 'Sending OTP...');
 
   try {
@@ -92,15 +84,11 @@ async function sendOTP(type) {
       }
     }
 
-    // Show OTP section
     const otpSection = document.getElementById(type === 'login' ? 'loginOtpSection' : 'regOtpSection');
     otpSection.classList.remove('hidden');
     setupOTPInputs(otpSection);
-
-    // Focus first OTP input
     setTimeout(() => { const first = otpSection.querySelector('.otp-digit'); if (first) first.focus(); }, 100);
 
-    // Start timer
     const timerEl = document.getElementById(type === 'login' ? 'loginOtpTimer' : 'regOtpTimer');
     if (otpTimerInterval) clearInterval(otpTimerInterval);
     otpTimerInterval = startOTPTimer(timerEl, CONFIG.OTP_TIMER, () => {
@@ -108,7 +96,6 @@ async function sendOTP(type) {
       if (resendBtn) resendBtn.disabled = false;
     });
 
-    // Enable resend after 30s
     setTimeout(() => {
       const resendBtn = document.getElementById('resendLoginOtp');
       if (resendBtn) resendBtn.disabled = false;
@@ -117,11 +104,9 @@ async function sendOTP(type) {
   } catch (err) {
     if (btn) setButtonLoading(btn, false);
     showToast('Network error. Please check your connection.', 'error');
-    console.error(err);
   }
 }
 
-// ===== VERIFY LOGIN =====
 async function verifyLogin() {
   const phone = document.getElementById('loginPhone').value.trim();
   const otpSection = document.getElementById('loginOtpSection');
@@ -145,7 +130,7 @@ async function verifyLogin() {
     localStorage.setItem(CONFIG.TOKEN_KEY, result.data.token);
     setUser(result.data.user);
     showToast(result.data.message, 'success');
-    setTimeout(() => window.location.href = '/pages/dashboard.html', 1000);
+    setTimeout(() => { window.location.href = '/dashboard'; }, 1000);
 
   } catch (err) {
     setButtonLoading(btn, false);
@@ -153,7 +138,6 @@ async function verifyLogin() {
   }
 }
 
-// ===== VERIFY REGISTER =====
 async function verifyRegister() {
   const phone = document.getElementById('regPhone').value.trim();
   const name = document.getElementById('regName').value.trim();
@@ -181,7 +165,7 @@ async function verifyRegister() {
     localStorage.setItem(CONFIG.TOKEN_KEY, result.data.token);
     setUser(result.data.user);
     showToast(result.data.message, 'success');
-    setTimeout(() => window.location.href = '/pages/dashboard.html', 1000);
+    setTimeout(() => { window.location.href = '/dashboard'; }, 1000);
 
   } catch (err) {
     setButtonLoading(btn, false);

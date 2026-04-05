@@ -1,16 +1,13 @@
 // ===== UTILITY FUNCTIONS =====
 
-// Toast Notification
 function showToast(message, type = 'info', duration = 4000) {
   const icons = { success: 'fa-check-circle', error: 'fa-times-circle', warning: 'fa-exclamation-triangle', info: 'fa-info-circle' };
   const container = document.getElementById('toastContainer');
   if (!container) return;
-
   const toast = document.createElement('div');
   toast.className = `toast ${type}`;
   toast.innerHTML = `<i class="fas ${icons[type]}"></i><span>${message}</span>`;
   container.appendChild(toast);
-
   setTimeout(() => {
     toast.classList.add('fade-out');
     setTimeout(() => toast.remove(), 300);
@@ -19,39 +16,45 @@ function showToast(message, type = 'info', duration = 4000) {
 
 // API Helper
 async function apiCall(endpoint, method = 'GET', body = null) {
-  const token = localStorage.getItem(CONFIG.TOKEN_KEY);
-  const headers = { 'Content-Type': 'application/json' };
-  if (token) headers['Authorization'] = `Bearer ${token}`;
-
-  const options = { method, headers };
-  if (body && method !== 'GET') options.body = JSON.stringify(body);
-
-  const response = await fetch(CONFIG.API_BASE + endpoint, options);
-  const data = await response.json();
-
-  if (response.status === 401) {
-    localStorage.removeItem(CONFIG.TOKEN_KEY);
-    localStorage.removeItem(CONFIG.USER_KEY);
-    window.location.href = '/';
-    return;
-  }
-
-  return { ok: response.ok, status: response.status, data };
-}
-
-// Get stored user
-function getUser() {
   try {
-    return JSON.parse(localStorage.getItem(CONFIG.USER_KEY));
-  } catch { return null; }
+    const token = localStorage.getItem(CONFIG.TOKEN_KEY);
+    const headers = { 'Content-Type': 'application/json' };
+
+    if (token) {
+      headers['Authorization'] = `Bearer ${token}`;
+    }
+
+    const options = { method, headers };
+    if (body && method !== 'GET') {
+      options.body = JSON.stringify(body);
+    }
+
+    const url = CONFIG.API_BASE + endpoint;
+    const response = await fetch(url, options);
+
+    let data;
+    try {
+      data = await response.json();
+    } catch (e) {
+      data = { message: 'Invalid server response' };
+    }
+
+    return { ok: response.ok, status: response.status, data };
+  } catch (err) {
+    console.error('API Error:', err);
+    return { ok: false, status: 0, data: { message: 'Network error. Please check connection.' } };
+  }
 }
 
-// Set stored user
+function getUser() {
+  try { return JSON.parse(localStorage.getItem(CONFIG.USER_KEY)); }
+  catch { return null; }
+}
+
 function setUser(user) {
   localStorage.setItem(CONFIG.USER_KEY, JSON.stringify(user));
 }
 
-// Format time (24h -> 12h)
 function formatTime(time24) {
   const [h, m] = time24.split(':').map(Number);
   const period = h >= 12 ? 'PM' : 'AM';
@@ -59,13 +62,11 @@ function formatTime(time24) {
   return `${h12}:${m.toString().padStart(2, '0')} ${period}`;
 }
 
-// Format date
 function formatDate(dateStr) {
   const d = new Date(dateStr);
   return d.toLocaleDateString('en-IN', { day: '2-digit', month: 'short', year: 'numeric' });
 }
 
-// Format relative time
 function timeAgo(date) {
   const diff = Date.now() - new Date(date);
   const mins = Math.floor(diff / 60000);
@@ -76,7 +77,6 @@ function timeAgo(date) {
   return `${Math.floor(hrs / 24)}d ago`;
 }
 
-// Loading state for button
 function setButtonLoading(btn, loading, text = '') {
   if (loading) {
     btn.disabled = true;
@@ -88,18 +88,15 @@ function setButtonLoading(btn, loading, text = '') {
   }
 }
 
-// Get avatar initials
 function getInitials(name) {
   if (!name) return '?';
   return name.split(' ').map(n => n[0]).join('').toUpperCase().slice(0, 2);
 }
 
-// Validate Indian phone number
 function isValidPhone(phone) {
   return /^[6-9]\d{9}$/.test(phone);
 }
 
-// Confirm dialog
 function confirmAction(message) {
   return new Promise((resolve) => {
     const overlay = document.createElement('div');
@@ -123,7 +120,6 @@ function confirmAction(message) {
   });
 }
 
-// OTP input auto-tab
 function setupOTPInputs(container) {
   const inputs = container.querySelectorAll('.otp-digit');
   inputs.forEach((input, idx) => {
@@ -143,18 +139,15 @@ function setupOTPInputs(container) {
       paste.split('').forEach((char, i) => {
         if (inputs[i]) { inputs[i].value = char; inputs[i].classList.add('filled'); }
       });
-      const lastFilled = Math.min(paste.length, inputs.length - 1);
-      inputs[lastFilled].focus();
+      inputs[Math.min(paste.length, inputs.length - 1)].focus();
     });
   });
 }
 
-// Get OTP value from inputs
 function getOTPValue(container) {
   return [...container.querySelectorAll('.otp-digit')].map(i => i.value).join('');
 }
 
-// OTP Timer
 function startOTPTimer(timerEl, seconds, onExpire) {
   let remaining = seconds;
   const spanEl = timerEl.querySelector('span');
@@ -172,18 +165,15 @@ function startOTPTimer(timerEl, seconds, onExpire) {
   return interval;
 }
 
-// Show/hide element
 function toggle(id, show) {
   const el = document.getElementById(id);
   if (el) el.classList.toggle('hidden', !show);
 }
 
-// Current time string
 function getCurrentTime() {
   return new Date().toLocaleTimeString('en-IN', { hour: '2-digit', minute: '2-digit', hour12: true });
 }
 
-// Current date string
 function getCurrentDate() {
   return new Date().toLocaleDateString('en-IN', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' });
 }
