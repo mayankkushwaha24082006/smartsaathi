@@ -1,0 +1,252 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>SmartSaathi – AI Healthcare Assistant</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800;900&family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+  <link rel="stylesheet" href="/css/main.css">
+ <link rel="stylesheet" href="/css/auth.css">
+</head>
+<body class="auth-page">
+
+  <!-- ===== LOADING SCREEN ===== -->
+  <div id="loadingScreen" class="loading-screen">
+    <div class="loader-content">
+      <div class="loader-logo">
+        <i class="fas fa-heartbeat pulse-icon"></i>
+      </div>
+      <h2>SmartSaathi</h2>
+      <p>Your AI Health Companion</p>
+      <div class="loader-bar"><div class="loader-progress"></div></div>
+    </div>
+  </div>
+
+  <!-- ===== LANDING PAGE ===== -->
+  <section id="landingPage" class="landing-page hidden">
+    <!-- Animated background -->
+    <div class="landing-bg">
+      <div class="bg-circle c1"></div>
+      <div class="bg-circle c2"></div>
+      <div class="bg-circle c3"></div>
+    </div>
+
+    <nav class="landing-nav">
+      <div class="nav-logo">
+        <i class="fas fa-heartbeat"></i>
+        <span>SmartSaathi</span>
+      </div>
+      <div class="nav-tagline">स्वस्थ रहें, सुरक्षित रहें</div>
+    </nav>
+
+    <div class="landing-hero">
+      <div class="hero-text">
+        <div class="hero-badge">
+          <i class="fas fa-robot"></i> AI-Powered Healthcare
+        </div>
+        <h1>Your Smart Health<br><span class="gradient-text">Companion</span></h1>
+        <p>SmartSaathi is designed especially for elderly users. Manage medicines, get health insights, and stay safe with our AI voice assistant.</p>
+        <div class="hero-features">
+          <div class="feature-pill"><i class="fas fa-pills"></i> Medicine Reminders</div>
+          <div class="feature-pill"><i class="fas fa-microphone"></i> Voice Commands</div>
+          <div class="feature-pill"><i class="fas fa-shield-alt"></i> SOS Alerts</div>
+          <div class="feature-pill"><i class="fas fa-stethoscope"></i> Disease Check</div>
+        </div>
+        <div class="hero-cta">
+          <button class="btn-primary-xl" onclick="showAuth('login')">
+            <i class="fas fa-sign-in-alt"></i> Login with OTP
+          </button>
+          <button class="btn-secondary-xl" onclick="showAuth('register')">
+            <i class="fas fa-user-plus"></i> Sign Up Free
+          </button>
+        </div>
+      </div>
+      <div class="hero-visual">
+        <div class="phone-mockup">
+          <div class="phone-inner">
+            <div class="mock-header">
+              <i class="fas fa-heartbeat"></i> SmartSaathi
+            </div>
+            <div class="mock-card">
+              <div class="mock-greeting">Good Morning, Ramesh! 🙏</div>
+              <div class="mock-stats">
+                <div class="mock-stat blue"><i class="fas fa-pills"></i><span>4 Medicines</span></div>
+                <div class="mock-stat green"><i class="fas fa-check-circle"></i><span>2 Taken</span></div>
+              </div>
+            </div>
+            <div class="mock-reminder">
+              <i class="fas fa-bell"></i>
+              <div>
+                <strong>Metformin 500mg</strong>
+                <span>Due in 30 mins</span>
+              </div>
+            </div>
+            <div class="mock-sos">
+              <i class="fas fa-exclamation-triangle"></i> SOS Emergency
+            </div>
+          </div>
+        </div>
+        <div class="floating-badge b1"><i class="fas fa-microphone"></i> Voice Ready</div>
+        <div class="floating-badge b2"><i class="fas fa-lock"></i> Secure OTP</div>
+        <div class="floating-badge b3"><i class="fas fa-bell"></i> Smart Alerts</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===== AUTH SECTION ===== -->
+  <section id="authSection" class="auth-section hidden">
+    <div class="auth-left">
+      <div class="auth-left-content">
+        <div class="auth-logo">
+          <i class="fas fa-heartbeat"></i>
+          <span>SmartSaathi</span>
+        </div>
+        <h2>Healthcare Made<br><span>Simple & Safe</span></h2>
+        <ul class="auth-benefits">
+          <li><i class="fas fa-check-circle"></i> Medicine reminders with voice alerts</li>
+          <li><i class="fas fa-check-circle"></i> AI disease prediction system</li>
+          <li><i class="fas fa-check-circle"></i> One-tap SOS emergency alert</li>
+          <li><i class="fas fa-check-circle"></i> 24/7 AI health chatbot</li>
+          <li><i class="fas fa-check-circle"></i> Calming music player</li>
+        </ul>
+        <button class="back-to-home" onclick="showLanding()">
+          <i class="fas fa-arrow-left"></i> Back to Home
+        </button>
+      </div>
+    </div>
+
+    <div class="auth-right">
+      <!-- Login Form -->
+      <div id="loginForm" class="auth-card">
+        <div class="auth-card-header">
+          <h2><i class="fas fa-sign-in-alt"></i> Welcome Back!</h2>
+          <p>Login with your phone number using OTP</p>
+        </div>
+
+        <div class="form-group">
+          <label for="loginPhone"><i class="fas fa-phone"></i> Mobile Number</label>
+          <div class="phone-input-wrapper">
+            <span class="phone-prefix">+91</span>
+            <input type="tel" id="loginPhone" placeholder="Enter 10-digit number" maxlength="10" pattern="[6-9][0-9]{9}" />
+          </div>
+        </div>
+
+        <button class="btn-otp" id="sendLoginOtp" onclick="sendOTP('login')">
+          <i class="fas fa-paper-plane"></i> Send OTP
+        </button>
+
+        <div id="loginOtpSection" class="otp-section hidden">
+          <label><i class="fas fa-key"></i> Enter OTP</label>
+          <div class="otp-input-group">
+            <input type="text" class="otp-digit" maxlength="1" />
+            <input type="text" class="otp-digit" maxlength="1" />
+            <input type="text" class="otp-digit" maxlength="1" />
+            <input type="text" class="otp-digit" maxlength="1" />
+            <input type="text" class="otp-digit" maxlength="1" />
+            <input type="text" class="otp-digit" maxlength="1" />
+          </div>
+          <div class="otp-timer" id="loginOtpTimer">OTP expires in <span>10:00</span></div>
+          <button class="btn-resend" id="resendLoginOtp" onclick="sendOTP('login')" disabled>
+            <i class="fas fa-redo"></i> Resend OTP
+          </button>
+          <button class="btn-verify" onclick="verifyLogin()">
+            <i class="fas fa-check"></i> Verify & Login
+          </button>
+        </div>
+
+        <!-- Dev OTP Display -->
+        <div id="devOtpDisplay" class="dev-otp hidden">
+          <i class="fas fa-code"></i> Dev Mode OTP: <strong id="devOtpValue"></strong>
+        </div>
+
+        <div class="auth-switch">
+          Don't have an account? <a href="#" onclick="toggleAuth('register')">Register here</a>
+        </div>
+      </div>
+
+      <!-- Register Form -->
+      <div id="registerForm" class="auth-card hidden">
+        <div class="auth-card-header">
+          <h2><i class="fas fa-user-plus"></i> Create Account</h2>
+          <p>Join SmartSaathi – your health companion</p>
+        </div>
+
+        <div id="regStep1">
+          <div class="form-group">
+            <label><i class="fas fa-user"></i> Full Name</label>
+            <input type="text" id="regName" placeholder="Enter your full name" />
+          </div>
+          <div class="form-row">
+            <div class="form-group">
+              <label><i class="fas fa-birthday-cake"></i> Age</label>
+              <input type="number" id="regAge" placeholder="Age" min="1" max="120" />
+            </div>
+            <div class="form-group">
+              <label><i class="fas fa-venus-mars"></i> Gender</label>
+              <select id="regGender">
+                <option value="">Select</option>
+                <option value="male">Male</option>
+                <option value="female">Female</option>
+                <option value="other">Other</option>
+              </select>
+            </div>
+          </div>
+          <div class="form-group">
+            <label><i class="fas fa-tint"></i> Blood Group (Optional)</label>
+            <select id="regBloodGroup">
+              <option value="">Select Blood Group</option>
+              <option>A+</option><option>A-</option>
+              <option>B+</option><option>B-</option>
+              <option>AB+</option><option>AB-</option>
+              <option>O+</option><option>O-</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label><i class="fas fa-phone"></i> Mobile Number</label>
+            <div class="phone-input-wrapper">
+              <span class="phone-prefix">+91</span>
+              <input type="tel" id="regPhone" placeholder="10-digit mobile number" maxlength="10" />
+            </div>
+          </div>
+          <button class="btn-otp" onclick="sendOTP('register')">
+            <i class="fas fa-paper-plane"></i> Send OTP
+          </button>
+        </div>
+
+        <div id="regOtpSection" class="otp-section hidden">
+          <label><i class="fas fa-key"></i> Enter OTP sent to your number</label>
+          <div class="otp-input-group">
+            <input type="text" class="otp-digit" maxlength="1" />
+            <input type="text" class="otp-digit" maxlength="1" />
+            <input type="text" class="otp-digit" maxlength="1" />
+            <input type="text" class="otp-digit" maxlength="1" />
+            <input type="text" class="otp-digit" maxlength="1" />
+            <input type="text" class="otp-digit" maxlength="1" />
+          </div>
+          <div class="otp-timer" id="regOtpTimer">OTP expires in <span>10:00</span></div>
+          <div id="regDevOtpDisplay" class="dev-otp hidden">
+            <i class="fas fa-code"></i> Dev Mode OTP: <strong id="regDevOtpValue"></strong>
+          </div>
+          <button class="btn-verify" onclick="verifyRegister()">
+            <i class="fas fa-user-check"></i> Register & Login
+          </button>
+        </div>
+
+        <div class="auth-switch">
+          Already have an account? <a href="#" onclick="toggleAuth('login')">Login here</a>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Toast Notifications -->
+  <div id="toastContainer" class="toast-container"></div>
+
+  <script src="/js/config.js"></script>
+  <script src="/js/utils.js"></script>
+  <script src="/js/auth.js"></script>
+</body>
+</html>

@@ -1,0 +1,486 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Dashboard – SmartSaathi</title>
+  <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800;900&family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+  <link rel="stylesheet" href="/css/main.css">
+  <link rel="stylesheet" href="/css/dashboard.css">
+</head>
+<body class="dashboard-page">
+
+  <!-- Mobile TopBar -->
+  <div class="mobile-topbar">
+    <button class="hamburger" onclick="toggleSidebar()" aria-label="Menu">
+      <span></span><span></span><span></span>
+    </button>
+    <div style="display:flex;align-items:center;gap:8px;font-weight:900;color:var(--primary);">
+      <i class="fas fa-heartbeat" style="color:var(--danger)"></i> SmartSaathi
+    </div>
+    <button class="notification-bell" onclick="showSection('reminders')">
+      <i class="fas fa-bell"></i>
+      <div class="notification-dot" id="notifDot"></div>
+    </button>
+  </div>
+
+  <div class="sidebar-overlay hidden" id="sidebarOverlay" onclick="toggleSidebar()"></div>
+
+  <div class="dashboard-container">
+    <!-- ===== SIDEBAR ===== -->
+    <aside class="sidebar" id="sidebar">
+      <div class="sidebar-logo">
+        <i class="fas fa-heartbeat"></i>
+        <div class="sidebar-logo-text">
+          <h2>SmartSaathi</h2>
+          <span>AI Health Companion</span>
+        </div>
+      </div>
+
+      <div class="sidebar-user">
+        <div class="sidebar-avatar" id="sidebarAvatar">R</div>
+        <div class="sidebar-user-info">
+          <div class="sidebar-user-name" id="sidebarName">Loading...</div>
+          <div class="sidebar-user-age" id="sidebarAge">--</div>
+        </div>
+      </div>
+
+      <nav class="sidebar-nav">
+        <div class="sidebar-section-title">Main</div>
+        <button class="nav-item active" data-section="home" onclick="showSection('home')">
+          <i class="fas fa-home"></i> Dashboard
+        </button>
+        <button class="nav-item" data-section="medicines" onclick="showSection('medicines')">
+          <i class="fas fa-pills"></i> Medicines
+          <span class="nav-badge hidden" id="medBadge">0</span>
+        </button>
+        <button class="nav-item" data-section="reminders" onclick="showSection('reminders')">
+          <i class="fas fa-bell"></i> Reminders
+        </button>
+        <button class="nav-item" data-section="disease" onclick="showSection('disease')">
+          <i class="fas fa-stethoscope"></i> Disease Check
+        </button>
+
+        <div class="sidebar-section-title" style="margin-top:8px;">Features</div>
+        <button class="nav-item" data-section="sos" onclick="showSection('sos')">
+          <i class="fas fa-exclamation-triangle" style="color:#ff8a80;"></i> SOS Emergency
+        </button>
+        <button class="nav-item" data-section="music" onclick="showSection('music')">
+          <i class="fas fa-music"></i> Music Player
+        </button>
+        <button class="nav-item" data-section="chatbot" onclick="showSection('chatbot')">
+          <i class="fas fa-robot"></i> AI Chatbot
+        </button>
+        <button class="nav-item" data-section="voice" onclick="openVoiceAssistant()">
+          <i class="fas fa-microphone"></i> Voice Assistant
+        </button>
+
+        <div class="sidebar-section-title" style="margin-top:8px;">Account</div>
+        <button class="nav-item" data-section="profile" onclick="showSection('profile')">
+          <i class="fas fa-user-circle"></i> My Profile
+        </button>
+      </nav>
+
+      <div class="sidebar-footer">
+        <button class="btn-logout" onclick="logout()">
+          <i class="fas fa-sign-out-alt"></i> Logout
+        </button>
+      </div>
+    </aside>
+
+    <!-- ===== MAIN CONTENT ===== -->
+    <main class="main-content">
+      <div class="topbar">
+        <div class="topbar-title" id="topbarTitle">Dashboard</div>
+        <div class="topbar-right">
+          <div class="current-time" id="currentTimeDisplay"></div>
+          <button class="notification-bell" onclick="showSection('reminders')" title="Reminders">
+            <i class="fas fa-bell"></i>
+            <div class="notification-dot" id="notifDot2"></div>
+          </button>
+          <button class="btn btn-sm btn-outline" onclick="openVoiceAssistant()">
+            <i class="fas fa-microphone"></i> Voice
+          </button>
+        </div>
+      </div>
+
+      <div class="page-content">
+
+        <!-- ===== HOME SECTION ===== -->
+        <section id="section-home" class="page-section">
+          <div class="welcome-banner">
+            <div style="position:relative;z-index:1;">
+              <div class="welcome-greeting" id="welcomeGreeting">Good Morning! 🙏</div>
+              <div class="welcome-date" id="welcomeDate">Loading...</div>
+              <div class="welcome-stats">
+                <div class="welcome-stat">
+                  <div class="welcome-stat-value" id="wsTotalMeds">-</div>
+                  <div class="welcome-stat-label">Total Medicines</div>
+                </div>
+                <div class="welcome-stat">
+                  <div class="welcome-stat-value" id="wsTodayTaken">-</div>
+                  <div class="welcome-stat-label">Taken Today</div>
+                </div>
+                <div class="welcome-stat">
+                  <div class="welcome-stat-value" id="wsUpcoming">-</div>
+                  <div class="welcome-stat-label">Upcoming</div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="stats-grid">
+            <div class="stat-card">
+              <div class="stat-icon blue"><i class="fas fa-pills"></i></div>
+              <div class="stat-info">
+                <div class="stat-value" id="statMeds">0</div>
+                <div class="stat-label">Active Medicines</div>
+              </div>
+            </div>
+            <div class="stat-card">
+              <div class="stat-icon green"><i class="fas fa-check-circle"></i></div>
+              <div class="stat-info">
+                <div class="stat-value" id="statTaken">0</div>
+                <div class="stat-label">Taken Today</div>
+              </div>
+            </div>
+            <div class="stat-card">
+              <div class="stat-icon orange"><i class="fas fa-clock"></i></div>
+              <div class="stat-info">
+                <div class="stat-value" id="statUpcoming">0</div>
+                <div class="stat-label">Upcoming Today</div>
+              </div>
+            </div>
+            <div class="stat-card">
+              <div class="stat-icon red"><i class="fas fa-phone-alt"></i></div>
+              <div class="stat-info">
+                <div class="stat-value" id="statContacts">0</div>
+                <div class="stat-label">Emergency Contacts</div>
+              </div>
+            </div>
+          </div>
+
+          <div class="grid-2" style="gap:20px;">
+            <!-- Today's Reminders (mini) -->
+            <div class="card">
+              <div class="card-header">
+                <div class="card-title"><i class="fas fa-clock"></i> Today's Reminders</div>
+                <button class="btn btn-sm btn-outline" onclick="showSection('reminders')">View All</button>
+              </div>
+              <div id="homeReminders">
+                <div class="empty-state" style="padding:24px;">
+                  <i class="fas fa-bell-slash" style="font-size:2rem;"></i>
+                  <p>No reminders for today</p>
+                </div>
+              </div>
+            </div>
+
+            <!-- Quick Actions -->
+            <div class="card">
+              <div class="card-header">
+                <div class="card-title"><i class="fas fa-bolt"></i> Quick Actions</div>
+              </div>
+              <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;">
+                <button class="btn btn-primary w-full" onclick="openAddMedicineModal()"><i class="fas fa-plus"></i> Add Medicine</button>
+                <button class="btn btn-secondary w-full" onclick="showSection('disease')"><i class="fas fa-stethoscope"></i> Check Symptoms</button>
+                <button class="btn btn-outline w-full" onclick="showSection('chatbot')"><i class="fas fa-robot"></i> Ask Saathi</button>
+                <button class="btn w-full" style="background:var(--danger);color:white;" onclick="showSection('sos')"><i class="fas fa-exclamation-triangle"></i> SOS Emergency</button>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <!-- ===== MEDICINES SECTION ===== -->
+        <section id="section-medicines" class="page-section hidden">
+          <div class="section-header">
+            <div class="section-title"><i class="fas fa-pills"></i> My Medicines</div>
+            <button class="btn btn-primary" onclick="openAddMedicineModal()">
+              <i class="fas fa-plus"></i> Add Medicine
+            </button>
+          </div>
+          <div id="medicineGrid" class="medicine-grid">
+            <div class="empty-state" style="grid-column:1/-1;">
+              <i class="fas fa-pills"></i>
+              <h3>No medicines added yet</h3>
+              <p>Add your medicines and set up daily reminders</p>
+            </div>
+          </div>
+        </section>
+
+        <!-- ===== REMINDERS SECTION ===== -->
+        <section id="section-reminders" class="page-section hidden">
+          <div class="section-header">
+            <div class="section-title"><i class="fas fa-bell"></i> Today's Reminders</div>
+            <div class="current-time" id="reminderCurrentTime" style="font-weight:800;font-size:1rem;color:var(--primary);"></div>
+          </div>
+          <div id="reminderList" class="reminder-list"></div>
+        </section>
+
+        <!-- ===== DISEASE SECTION ===== -->
+        <section id="section-disease" class="page-section hidden">
+          <div class="section-title" style="margin-bottom:20px;"><i class="fas fa-stethoscope"></i> Disease Prediction System</div>
+          <div class="grid-2" style="gap:20px;align-items:start;">
+            <div class="card">
+              <div class="card-header">
+                <div class="card-title"><i class="fas fa-search"></i> Enter Your Symptoms</div>
+              </div>
+              <p style="font-size:0.9rem;color:var(--text-muted);margin-bottom:14px;">Type each symptom and press Enter or click Add. Be as specific as possible.</p>
+              <div style="display:flex;gap:8px;margin-bottom:12px;">
+                <input type="text" id="symptomInput" placeholder="E.g. headache, fever, nausea..." class="form-group input" style="flex:1;padding:12px;border:2px solid var(--border);border-radius:var(--radius-sm);font-family:var(--font-main);font-size:0.95rem;" />
+                <button class="btn btn-primary" onclick="addSymptom()"><i class="fas fa-plus"></i></button>
+              </div>
+              <div class="symptom-tags" id="symptomTags"><span style="color:var(--text-light);font-size:0.85rem;padding:4px;">Your symptoms will appear here...</span></div>
+              <div style="margin-top:8px;margin-bottom:16px;">
+                <p style="font-size:0.82rem;color:var(--text-muted);font-weight:600;margin-bottom:8px;">Common symptoms:</p>
+                <div id="symptomSuggestions" style="display:flex;flex-wrap:wrap;gap:6px;"></div>
+              </div>
+              <button class="btn btn-primary w-full" onclick="predictDisease()" id="predictBtn">
+                <i class="fas fa-search"></i> Analyze Symptoms
+              </button>
+              <button class="btn btn-outline w-full mt-1" onclick="clearSymptoms()">
+                <i class="fas fa-times"></i> Clear All
+              </button>
+              <div style="background:#fff9e6;border-left:4px solid var(--warning);padding:12px;border-radius:var(--radius-sm);margin-top:16px;font-size:0.82rem;color:#856404;">
+                <i class="fas fa-exclamation-triangle"></i> <strong>Disclaimer:</strong> This is an AI-based preliminary assessment only. Always consult a qualified doctor for diagnosis.
+              </div>
+            </div>
+            <div id="predictionResults">
+              <div class="empty-state">
+                <i class="fas fa-stethoscope"></i>
+                <h3>Enter Symptoms</h3>
+                <p>Add your symptoms and click Analyze to see possible health conditions</p>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <!-- ===== SOS SECTION ===== -->
+        <section id="section-sos" class="page-section hidden">
+          <div class="section-title" style="margin-bottom:20px;"><i class="fas fa-exclamation-triangle" style="color:var(--danger);"></i> SOS Emergency</div>
+          <div class="sos-hero">
+            <h2 style="font-size:1.4rem;font-weight:900;color:var(--danger);margin-bottom:8px;">Emergency Alert System</h2>
+            <p style="color:var(--text-muted);margin-bottom:28px;">Press the button below in case of emergency. Alerts will be sent to all your emergency contacts.</p>
+            <button class="sos-button" id="sosBtn" onclick="triggerSOS()">
+              <i class="fas fa-exclamation-triangle"></i>
+              SOS HELP
+            </button>
+            <p class="sos-description">One tap sends emergency alert to all your contacts</p>
+          </div>
+
+          <div class="grid-2" style="gap:20px;">
+            <div class="card">
+              <div class="card-header">
+                <div class="card-title"><i class="fas fa-phone-alt"></i> Emergency Contacts</div>
+                <button class="btn btn-sm btn-outline" onclick="showSection('profile')">Manage</button>
+              </div>
+              <div id="sosContactsList">
+                <div class="empty-state" style="padding:20px;">
+                  <i class="fas fa-user-plus" style="font-size:2rem;"></i>
+                  <p>Add emergency contacts in your profile</p>
+                </div>
+              </div>
+            </div>
+            <div class="card">
+              <div class="card-header">
+                <div class="card-title"><i class="fas fa-history"></i> Recent Alerts</div>
+              </div>
+              <div id="sosHistory">
+                <div class="empty-state" style="padding:20px;">
+                  <i class="fas fa-check-circle" style="font-size:2rem;color:var(--success);"></i>
+                  <p>No SOS alerts sent recently</p>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="card mt-2" style="background:#fff5f5;border:2px solid rgba(229,57,53,0.2);">
+            <h3 style="font-weight:800;color:var(--danger);margin-bottom:12px;"><i class="fas fa-phone"></i> Important Emergency Numbers</h3>
+            <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:10px;">
+              <div style="background:white;padding:12px;border-radius:var(--radius-sm);text-align:center;box-shadow:var(--shadow);">
+                <div style="font-size:1.4rem;font-weight:900;color:var(--danger);">112</div>
+                <div style="font-size:0.82rem;color:var(--text-muted);font-weight:600;">National Emergency</div>
+              </div>
+              <div style="background:white;padding:12px;border-radius:var(--radius-sm);text-align:center;box-shadow:var(--shadow);">
+                <div style="font-size:1.4rem;font-weight:900;color:var(--primary);">102</div>
+                <div style="font-size:0.82rem;color:var(--text-muted);font-weight:600;">Ambulance</div>
+              </div>
+              <div style="background:white;padding:12px;border-radius:var(--radius-sm);text-align:center;box-shadow:var(--shadow);">
+                <div style="font-size:1.4rem;font-weight:900;color:var(--secondary);">1800-599-0019</div>
+                <div style="font-size:0.82rem;color:var(--text-muted);font-weight:600;">Mental Health</div>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <!-- ===== MUSIC SECTION ===== -->
+        <section id="section-music" class="page-section hidden">
+          <div class="section-title" style="margin-bottom:20px;"><i class="fas fa-music"></i> Relaxing Music Player</div>
+          <div class="grid-2" style="gap:20px;align-items:start;">
+            <div class="music-player" id="musicPlayer">
+              <div class="music-disc" id="musicDisc">🎵</div>
+              <div class="music-title" id="musicTitle">Select a track</div>
+              <div class="music-artist" id="musicArtist">SmartSaathi Wellness</div>
+              <div class="music-progress" id="musicProgressBar" onclick="seekMusic(event)">
+                <div class="music-progress-fill" id="musicProgressFill" style="width:0%"></div>
+              </div>
+              <div class="music-time">
+                <span id="musicCurrent">0:00</span>
+                <span id="musicDuration">0:00</span>
+              </div>
+              <div class="music-controls">
+                <button class="music-btn" onclick="prevTrack()" title="Previous"><i class="fas fa-backward"></i></button>
+                <button class="music-btn play-pause" id="playPauseBtn" onclick="togglePlay()" title="Play/Pause">
+                  <i class="fas fa-play"></i>
+                </button>
+                <button class="music-btn" onclick="nextTrack()" title="Next"><i class="fas fa-forward"></i></button>
+                <button class="music-btn" id="loopBtn" onclick="toggleLoop()" title="Loop"><i class="fas fa-redo"></i></button>
+              </div>
+              <div style="display:flex;align-items:center;gap:10px;margin-bottom:16px;">
+                <i class="fas fa-volume-down" style="opacity:0.7;font-size:0.9rem;"></i>
+                <input type="range" id="volumeSlider" min="0" max="1" step="0.05" value="0.7" style="flex:1;accent-color:var(--secondary);" oninput="setVolume(this.value)" />
+                <i class="fas fa-volume-up" style="opacity:0.7;font-size:0.9rem;"></i>
+              </div>
+            </div>
+            <div class="card" style="padding:0;overflow:hidden;">
+              <div style="padding:16px 20px;border-bottom:1px solid var(--border);font-weight:800;color:var(--text);"><i class="fas fa-list-ul" style="color:var(--primary);margin-right:6px;"></i> Playlist</div>
+              <div class="music-playlist" id="musicPlaylist" style="padding:12px;max-height:480px;overflow-y:auto;"></div>
+            </div>
+          </div>
+        </section>
+
+        <!-- ===== CHATBOT SECTION ===== -->
+        <section id="section-chatbot" class="page-section hidden">
+          <div class="section-title" style="margin-bottom:20px;"><i class="fas fa-robot"></i> Saathi AI Chatbot</div>
+          <div class="chatbot-container">
+            <div class="chatbot-header">
+              <div class="chatbot-avatar">🤖</div>
+              <div class="chatbot-info">
+                <h3>Saathi Health Assistant</h3>
+                <span><span class="online-dot"></span>Always here for you</span>
+              </div>
+              <button onclick="clearChat()" title="Clear chat" style="background:rgba(255,255,255,0.2);border:none;color:white;padding:6px 10px;border-radius:8px;cursor:pointer;margin-left:auto;font-size:0.8rem;font-family:var(--font-main);font-weight:700;"><i class="fas fa-trash"></i></button>
+            </div>
+            <div class="chatbot-suggestions" id="chatSuggestions">
+              <div class="suggestion-chip" onclick="sendSuggestion('Show my medicines')">💊 My medicines</div>
+              <div class="suggestion-chip" onclick="sendSuggestion('I have a headache')">🤕 Headache tips</div>
+              <div class="suggestion-chip" onclick="sendSuggestion('Blood pressure tips')">❤️ BP tips</div>
+              <div class="suggestion-chip" onclick="sendSuggestion('Play music')">🎵 Play music</div>
+              <div class="suggestion-chip" onclick="sendSuggestion('I feel sad')">😢 I feel sad</div>
+            </div>
+            <div class="chatbot-messages" id="chatMessages"></div>
+            <div class="chatbot-input-area">
+              <textarea class="chatbot-input" id="chatInput" placeholder="Ask Saathi anything..." rows="1" onkeydown="handleChatKeydown(event)"></textarea>
+              <button class="chatbot-send" onclick="sendChatMessage()"><i class="fas fa-paper-plane"></i></button>
+              <button class="chatbot-send" onclick="openVoiceAssistant()" style="background:var(--secondary);" title="Voice input"><i class="fas fa-microphone"></i></button>
+            </div>
+          </div>
+        </section>
+
+        <!-- ===== PROFILE SECTION ===== -->
+        <section id="section-profile" class="page-section hidden">
+          <div class="section-title" style="margin-bottom:20px;"><i class="fas fa-user-circle"></i> My Profile</div>
+          <div class="profile-header-card">
+            <div class="profile-avatar-large" id="profileAvatar">R</div>
+            <div>
+              <div class="profile-name" id="profileName">Loading...</div>
+              <div class="profile-details">
+                <div class="profile-detail-item"><i class="fas fa-phone"></i> <span id="profilePhone">-</span></div>
+                <div class="profile-detail-item"><i class="fas fa-birthday-cake"></i> <span id="profileAge">-</span></div>
+                <div class="profile-detail-item"><i class="fas fa-tint"></i> <span id="profileBlood">-</span></div>
+                <div class="profile-detail-item"><i class="fas fa-user-md"></i> Dr. <span id="profileDoctor">-</span></div>
+              </div>
+            </div>
+            <button class="btn btn-outline" style="color:white;border-color:rgba(255,255,255,0.5);margin-left:auto;" onclick="openEditProfileModal()">
+              <i class="fas fa-edit"></i> Edit
+            </button>
+          </div>
+
+          <div class="grid-2" style="gap:20px;">
+            <!-- Medical Conditions -->
+            <div class="card">
+              <div class="card-header">
+                <div class="card-title"><i class="fas fa-heartbeat"></i> Medical Conditions</div>
+                <button class="btn btn-sm btn-primary" onclick="openAddConditionModal()"><i class="fas fa-plus"></i> Add</button>
+              </div>
+              <div id="conditionsList">
+                <div class="empty-state" style="padding:20px;"><i class="fas fa-clipboard-list" style="font-size:2rem;"></i><p>No conditions added</p></div>
+              </div>
+            </div>
+
+            <!-- Emergency Contacts -->
+            <div class="card">
+              <div class="card-header">
+                <div class="card-title"><i class="fas fa-phone-alt"></i> Emergency Contacts</div>
+                <button class="btn btn-sm btn-primary" onclick="openAddContactModal()"><i class="fas fa-plus"></i> Add</button>
+              </div>
+              <div id="contactsList">
+                <div class="empty-state" style="padding:20px;"><i class="fas fa-users" style="font-size:2rem;"></i><p>No contacts added</p></div>
+              </div>
+            </div>
+          </div>
+        </section>
+
+      </div><!-- /page-content -->
+    </main>
+  </div>
+
+  <!-- ===== FLOATING BUTTONS ===== -->
+  <div class="fab-container">
+    <div class="fab-item">
+      <div class="fab-label">Voice</div>
+      <button class="fab fab-voice" onclick="openVoiceAssistant()" title="Voice Assistant">
+        <i class="fas fa-microphone"></i>
+      </button>
+    </div>
+    <div class="fab-item">
+      <div class="fab-label">SOS</div>
+      <button class="fab fab-sos" onclick="triggerSOS()" title="SOS Emergency">
+        <i class="fas fa-exclamation-triangle"></i>
+      </button>
+    </div>
+  </div>
+
+  <!-- ===== VOICE ASSISTANT MODAL ===== -->
+  <div class="voice-modal hidden" id="voiceModal">
+    <div class="voice-modal-content">
+      <h2 style="font-size:1.3rem;font-weight:900;margin-bottom:8px;"><i class="fas fa-microphone" style="color:var(--primary);"></i> Voice Assistant</h2>
+      <p style="color:var(--text-muted);font-size:0.9rem;">Say a command or tap the mic to start</p>
+      <div class="voice-wave" id="voiceWave">
+        <div class="wave-bar"></div><div class="wave-bar"></div><div class="wave-bar"></div>
+        <div class="wave-bar"></div><div class="wave-bar"></div><div class="wave-bar"></div>
+        <div class="wave-bar"></div>
+      </div>
+      <button class="voice-mic-btn" id="voiceMicBtn" onclick="toggleVoiceListening()">
+        <i class="fas fa-microphone"></i>
+      </button>
+      <div id="voiceTranscript" style="min-height:40px;font-weight:700;color:var(--text);margin:12px 0;padding:10px;background:var(--bg);border-radius:var(--radius-sm);">Tap mic to start listening...</div>
+      <div id="voiceStatus" style="font-size:0.85rem;color:var(--text-muted);margin-bottom:16px;"></div>
+      <div style="background:var(--bg);border-radius:var(--radius-sm);padding:12px;font-size:0.82rem;color:var(--text-muted);text-align:left;margin-bottom:16px;">
+        <strong style="color:var(--text);">Try saying:</strong><br>
+        "Add medicine" • "Check disease" • "Play music" • "Call SOS" • "Show reminders" • "Open chatbot"
+      </div>
+      <button class="btn btn-outline w-full" onclick="closeVoiceModal()"><i class="fas fa-times"></i> Close</button>
+    </div>
+  </div>
+
+  <!-- ===== TOAST CONTAINER ===== -->
+  <div id="toastContainer" class="toast-container"></div>
+
+  <!-- ===== MODALS CONTAINER ===== -->
+  <div id="modalsContainer"></div>
+
+  <!-- Scripts -->
+  <script src="/js/config.js"></script>
+  <script src="/js/utils.js"></script>
+  <script src="/js/dashboard.js"></script>
+  <script src="/js/medicines.js"></script>
+  <script src="/js/reminders.js"></script>
+  <script src="/js/disease.js"></script>
+  <script src="/js/sos.js"></script>
+  <script src="/js/music.js"></script>
+  <script src="/js/chatbot.js"></script>
+  <script src="/js/voice.js"></script>
+  <script src="/js/profile.js"></script>
+</body>
+</html>
