@@ -41,24 +41,26 @@ const verifyOTP = async (phone, inputOTP, purpose = 'login') => {
 };
 
 const sendOTPViaSMS = async (phone, otp) => {
-  if (process.env.NODE_ENV === 'development' || !process.env.TWILIO_ACCOUNT_SID || process.env.TWILIO_ACCOUNT_SID === 'your_twilio_account_sid') {
-    console.log(`\n📱 OTP for ${phone}: ${otp} (Dev Mode)\n`);
-    return { success: true, mode: 'development', otp };
-  }
+  // Try Twilio SMS first
   try {
-    const twilio = require('twilio');
-    const client = twilio(process.env.TWILIO_ACCOUNT_SID, process.env.TWILIO_AUTH_TOKEN);
-    await client.messages.create({
-      body: `Your SmartSaathi OTP is: ${otp}. Valid for ${process.env.OTP_EXPIRE_MINUTES || 10} minutes.`,
-      from: process.env.TWILIO_PHONE_NUMBER,
-      to: `+91${phone}`
-    });
-    return { success: true, mode: 'sms' };
+    if (process.env.TWILIO_ACCOUNT_SID &&
+        process.env.TWILIO_ACCOUNT_SID !== 'your_twilio_account_sid') {
+      const twilio = require('twilio');
+      const client = twilio(process.env.TWILIO_ACCOUNT_SID, process.env.TWILIO_AUTH_TOKEN);
+      await client.messages.create({
+        body: `Your SmartSaathi OTP is: ${otp}. Valid for 1 minute. Do not share with anyone.`,
+        from: process.env.TWILIO_PHONE_NUMBER,
+        to: `+91${phone}`
+      });
+      console.log(`OTP SMS sent to +91${phone}`);
+    }
   } catch (error) {
-    console.log(`📱 OTP (SMS failed): ${otp}`);
-    return { success: false, otp };
+    console.log(`Twilio failed — showing OTP on screen instead`);
   }
+
+  // ALWAYS return OTP so it shows on the website screen
+  console.log(`OTP for ${phone}: ${otp}`);
+  return { success: true, mode: 'development', otp };
 };
 
 module.exports = { generateOTP, saveOTP, verifyOTP, sendOTPViaSMS };
-
