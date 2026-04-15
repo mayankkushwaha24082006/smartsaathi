@@ -41,9 +41,9 @@ const verifyOTP = async (phone, inputOTP, purpose = 'login') => {
 };
 
 const sendOTPViaSMS = async (phone, otp) => {
-  // Try Twilio SMS first
+  // Try Twilio SMS
   try {
-    if (process.env.TWILIO_ACCOUNT_SID &&
+    if (process.env.TWILIO_ACCOUNT_SID && 
         process.env.TWILIO_ACCOUNT_SID !== 'your_twilio_account_sid') {
       const twilio = require('twilio');
       const client = twilio(process.env.TWILIO_ACCOUNT_SID, process.env.TWILIO_AUTH_TOKEN);
@@ -52,14 +52,14 @@ const sendOTPViaSMS = async (phone, otp) => {
         from: process.env.TWILIO_PHONE_NUMBER,
         to: `+91${phone}`
       });
-      console.log(`OTP SMS sent to +91${phone}`);
+      console.log(`✅ SMS sent to +91${phone}`);
     }
   } catch (error) {
-    console.log(`Twilio failed — showing OTP on screen instead`);
+    console.log(`⚠️ SMS failed for ${phone}: ${error.message}`);
   }
 
-  // ALWAYS return OTP so it shows on the website screen
-  console.log(`OTP for ${phone}: ${otp}`);
+  // ALWAYS return otp — shows on screen for everyone
+  console.log(`📱 OTP for ${phone}: ${otp}`);
   return { success: true, mode: 'development', otp };
 };
 
